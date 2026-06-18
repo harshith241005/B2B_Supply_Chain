@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Search, Play, CheckCircle, Clock, AlertCircle, Database, Phone } from 'lucide-react';
 import './index.css';
 
-const API_BASE = 'http://localhost:5000/api';
+const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:5000/api';
 
 function App() {
   const [isProcessing, setIsProcessing] = useState(false);
