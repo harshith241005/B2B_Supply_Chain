@@ -1,9 +1,11 @@
-FROM node:20-slim
+FROM node:22-slim
 
-# Install system dependencies required for Puppeteer / Chromium
+# Install system dependencies required for Puppeteer / Chromium (including tar and unzip for extraction)
 RUN apt-get update && apt-get install -y \
     wget \
     gnupg \
+    tar \
+    unzip \
     libgbm-dev \
     libxss1 \
     libasound2 \
