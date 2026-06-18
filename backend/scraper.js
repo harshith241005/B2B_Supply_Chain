@@ -14,35 +14,35 @@ async function scrapeInstacart(searchTerm) {
 
     const page = await browser.newPage();
     await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36');
-    
-    // Simulate navigating to Instacart
-    // await page.goto(`https://www.instacart.com/store/s?k=${encodeURIComponent(searchTerm)}`);
     await delay(1000); 
-
-    // MOCK INSTACART DATA
-    // In a production environment, you would use page.evaluate() to extract links, 
-    // navigate to them, and extract the real HTML. For this reliable demo, we mock the parsed results.
-    const mockProducts = [
-      {
-        name: `Premium ${searchTerm.replace('+', ' ').toUpperCase()}`,
-        manufacturerName: `${searchTerm.split('+')[0].toUpperCase()} Foods Inc.`,
-        url: `https://www.instacart.com/products/mock-${searchTerm}`,
-        store: "Instacart Local",
-        ingredients: ["Water", "Salt", "Organic " + searchTerm.split('+')[0], "Spices"]
-      },
-      {
-        name: `Budget ${searchTerm.replace('+', ' ').toUpperCase()}`,
-        manufacturerName: `Global ${searchTerm.split('+')[0]} Supply`,
-        url: `https://www.instacart.com/products/mock-budget-${searchTerm}`,
-        store: "Instacart Bulk",
-        ingredients: ["Artificial Flavors", "Preservatives", searchTerm.split('+')[0]]
-      }
-    ];
-
     await browser.close();
+  } catch (puppeteerError) {
+    console.warn("Puppeteer launch skipped/failed, running in mock browser mode:", puppeteerError.message);
+  }
 
-    // Now enrich the data with SerpAPI contacts
-    const enrichedProducts = [];
+  // MOCK INSTACART DATA
+  // In a production environment, you would use page.evaluate() to extract links, 
+  // navigate to them, and extract the real HTML. For this reliable demo, we mock the parsed results.
+  const mockProducts = [
+    {
+      name: `Premium ${searchTerm.replace('+', ' ').toUpperCase()}`,
+      manufacturerName: `${searchTerm.split('+')[0].toUpperCase()} Foods Inc.`,
+      url: `https://www.instacart.com/products/mock-${searchTerm}`,
+      store: "Instacart Local",
+      ingredients: ["Water", "Salt", "Organic " + searchTerm.split('+')[0], "Spices"]
+    },
+    {
+      name: `Budget ${searchTerm.replace('+', ' ').toUpperCase()}`,
+      manufacturerName: `Global ${searchTerm.split('+')[0]} Supply`,
+      url: `https://www.instacart.com/products/mock-budget-${searchTerm}`,
+      store: "Instacart Bulk",
+      ingredients: ["Artificial Flavors", "Preservatives", searchTerm.split('+')[0]]
+    }
+  ];
+
+  // Now enrich the data with SerpAPI contacts
+  const enrichedProducts = [];
+  try {
     for (const prod of mockProducts) {
       const contacts = await getManufacturerContacts(prod.manufacturerName);
       enrichedProducts.push({
@@ -52,13 +52,11 @@ async function scrapeInstacart(searchTerm) {
         manufacturerPhone: contacts.phone
       });
     }
-
-    return enrichedProducts;
-  } catch (error) {
-    console.error("Scraping error:", error);
-    if (browser) await browser.close();
-    return [];
+  } catch (enrichError) {
+    console.error("Enrichment error:", enrichError);
   }
+
+  return enrichedProducts;
 }
 
 module.exports = { scrapeInstacart };
