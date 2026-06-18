@@ -50,15 +50,21 @@ app.get('/api/mappings', async (req, res) => {
 
 // Endpoint to trigger Instacart scraping based on search terms
 app.post('/api/search', async (req, res) => {
-  const { terms } = req.body;
-  if (!terms || !Array.isArray(terms)) {
-    return res.status(400).json({ error: 'Invalid search terms' });
+  console.log('Request body:', req.body);
+  try {
+    const { terms } = req.body;
+    if (!terms || !Array.isArray(terms)) {
+      return res.status(400).json({ error: 'Invalid search terms' });
+    }
+
+    scrapingProgress = { total: terms.length, completed: 0, logs: [] };
+    res.json({ message: 'Instacart scraping pipeline started.' });
+
+    processInstacartTermsBackground(terms);
+  } catch (error) {
+    console.error('Search route error:', error);
+    res.status(500).json({ error: error.message });
   }
-
-  scrapingProgress = { total: terms.length, completed: 0, logs: [] };
-  res.json({ message: 'Instacart scraping pipeline started.' });
-
-  processInstacartTermsBackground(terms);
 });
 
 async function processInstacartTermsBackground(terms) {
